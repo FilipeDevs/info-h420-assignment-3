@@ -1,0 +1,3 @@
+# Airflow itself is installed separately with its constraints file (see README)
+openai==X.Y.Z
+pymupdf4llm==X.Y.Z

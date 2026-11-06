@@ -1,5 +1,6 @@
 import html
 import json
+import requests
 import os
 import shutil
 import sqlite3
@@ -102,3 +103,28 @@ def render_html():
     tmp.write_text(page, encoding="utf-8")
     os.replace(tmp, out_dir / "index.html")
     return str(out_dir / "index.html")
+
+
+# ---------- Discord ----------
+
+def notify_discord(filename, meta):
+    url = os.environ.get("DISCORD_WEBHOOK_URL")
+    if not url:
+        print("DISCORD_WEBHOOK_URL not set, skipping notification")
+        return False
+
+    payload = {
+        "content": "New paper added to the library",
+        "embeds": [{
+            "title": meta["title"][:256],
+            "description": meta["summary"][:4000],
+            "fields": [
+                {"name": "Category", "value": meta["category"], "inline": True},
+                {"name": "File", "value": filename, "inline": True},
+                {"name": "Keywords", "value": ", ".join(meta["keywords"])[:1024] or "-"},
+            ],
+        }],
+    }
+    response = requests.post(url, json=payload, timeout=10)
+    response.raise_for_status()
+    return True

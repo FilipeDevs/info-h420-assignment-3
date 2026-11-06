@@ -13,3 +13,5 @@ export OUTPUT_DIR="$LIBRARY_DIR/output"
 
 # Local SQLite database (outside the synced folder)
 export DB_PATH="$HOME/assignment-3/data/papers.db"
+# Secrets (not in Git): create env.local with your own DISCORD_WEBHOOK_URL
+[ -f "$HOME/assignment-3/env.local" ] && source "$HOME/assignment-3/env.local"

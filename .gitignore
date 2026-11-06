@@ -222,3 +222,4 @@ __marimo__/
 # Airflow and local data
 airflow/
 data/
+env.local

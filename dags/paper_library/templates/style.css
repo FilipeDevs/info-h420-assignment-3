@@ -1,0 +1,28 @@
+/* Bootstrap does most of the styling; this file only adds our own touches. */
+
+.library {
+  max-width: 900px;
+}
+
+/* Paper cards: no border, a light shadow that grows on hover */
+.paper-card {
+  border: none;
+  transition: box-shadow 0.15s ease;
+}
+
+.paper-card:hover {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Category label */
+.category-badge {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+/* Keyword tags */
+.keyword {
+  background-color: #eaeef2;
+  color: #1f2328;
+  font-weight: 500;
+}

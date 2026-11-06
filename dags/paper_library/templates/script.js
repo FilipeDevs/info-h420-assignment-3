@@ -1,7 +1,7 @@
 const searchInput = document.getElementById("q");
 const categorySelect = document.getElementById("cat");
 const count = document.getElementById("count");
-const cards = [...document.querySelectorAll(".card")];
+const cards = [...document.querySelectorAll(".paper-card")];
 
 function applyFilters() {
   const term = searchInput.value.trim().toLowerCase();

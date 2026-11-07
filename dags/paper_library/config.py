@@ -6,7 +6,7 @@ from pathlib import Path
 @dataclass(frozen=True)
 class Settings:
     """
-    All configuration options of the pipeline, read from the environment (env.sh).
+    All configuration options of the pipeline, read from the environment (env.sh)
     """
     papers_dir: Path
     output_dir: Path
@@ -27,5 +27,6 @@ class Settings:
             markdown_dir=db_path.parent / "markdown",
             discord_webhook_url=os.environ.get("DISCORD_WEBHOOK_URL"),
             llm_base_url=os.environ.get("LLM_BASE_URL", "http://localhost:11434/v1"),
-            llm_model=os.environ.get("LLM_MODEL", "gemma4:12b"),
+            # default model is gemma4:12b so if you want another one change your env.local and export LLM_MODEL="<model-name>"
+            llm_model=os.environ.get("LLM_MODEL", "gemma4:12b"), 
         )

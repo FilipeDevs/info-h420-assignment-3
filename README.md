@@ -23,22 +23,21 @@ pip install --upgrade pip
 **2. Install Airflow and the dependencies**
 
 ```bash
-AIRFLOW_VERSION=3.3.2
-PYTHON_VERSION="$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
-pip install "apache-airflow==${AIRFLOW_VERSION}" \
-  --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
+pip install "apache-airflow==3.3.2" \
+  --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-3.3.2/constraints-3.12.txt"
 pip install -r requirements.txt
 ```
 
-**3. Install Ollama and the model (we used gemma4:12b but you can use any model)**
+**3. Install Ollama and the model**
+
+We used `gemma4:12b`. To use another model, pull it and add `export LLM_MODEL="<model-name>"` to `env.local`.
 
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ollama pull gemma4:12b
 ```
 
-Raise Ollama's context window (depends on your system/GPU) so it reads whole papers (Linux / WSL):
-
+(Optional) We deciced to increase ollama context window so it can read longer papers but this is up to your system:
 ```bash
 sudo mkdir -p /etc/systemd/system/ollama.service.d
 printf '[Service]\nEnvironment="OLLAMA_CONTEXT_LENGTH=32768"\n' | sudo tee /etc/systemd/system/ollama.service.d/override.conf
@@ -49,11 +48,12 @@ sudo systemctl daemon-reload && sudo systemctl restart ollama
  
 The pipeline reads PDFs from a folder on your machine that Google Drive keeps in sync.
  
-1. Create a folder named `ResearchLibrary` with two empty folders inside it, `papers` and `output`.
-2. In Google Drive for Desktop sync the folder to your machine.
+1. Create a folder named `ResearchLibrary` with two empty folders inside it named `papers` and `output`.
+2. In Google Drive for Desktop sync the folder `ResearchLibrary` to your machine.
 3. Open `env.sh` and replace the path on the `LIBRARY_DIR` line with the path of your folder:
+
 ```bash
-   export LIBRARY_DIR="/mnt/c/Users/<you>/Documents/ResearchLibrary"
+   export LIBRARY_DIR="<your-path-to-ResearchLibrary>"
 ```
 
 **5. Discord webhook**
@@ -76,9 +76,9 @@ And to start airflow:
 airflow standalone
 ```
 
-1. Open http://localhost:8080 and log in as `admin` (the password is printed at startup).
+1. Open http://localhost:8080 and log in as `admin` (the password is printed at startup or you can find it in the airflow folder named `simple_auth_manager_passwords.json.generated`).
 2. Switch on the `paper_pipeline` DAG. By default it runs every 5 minutes, but you can trigger it manually.
 3. Put PDFs in `ResearchLibrary/papers/` (examples are in `papers/`).
 4. Open `ResearchLibrary/output/index.html` to browse the library when airflow has finished processing the papers.
 
-If you want to reset every paper just delete the database: `rm data/papers.db`.
+If you want to reset all the papers just delete the database: `rm data/papers.db`.

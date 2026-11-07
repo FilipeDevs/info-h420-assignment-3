@@ -4,6 +4,10 @@ const count = document.getElementById("count");
 const cards = [...document.querySelectorAll(".paper-card")];
 
 function applyFilters() {
+  /**
+   * Filter function that shows/hides cards based on the search input and selected category. 
+   * It also updates the count of shown papers.
+   */
   const term = searchInput.value.trim().toLowerCase();
   const category = categorySelect.value;
   let shown = 0;

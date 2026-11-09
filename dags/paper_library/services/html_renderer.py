@@ -3,6 +3,7 @@ import os
 import shutil
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import quote
 
 from paper_library.models import Paper
 
@@ -50,6 +51,7 @@ class LibraryPageRenderer:
         summary = html.escape(metadata.summary)
         category = html.escape(metadata.category)
         filename = html.escape(paper.filename)
+        file_href = quote(paper.filename) # spaces or # in the name would break the link
         added_on = paper.processed_at[:10]
 
         keyword_tags = ""
@@ -64,7 +66,7 @@ class LibraryPageRenderer:
     <article class="card paper-card shadow-sm mb-3" data-category="{category}" data-search="{search_text}">
       <div class="card-body">
         <h2 class="h5 card-title mb-2">
-          <a class="link-body-emphasis text-decoration-none" href="../papers/{filename}">{title}</a>
+          <a class="link-body-emphasis text-decoration-none" href="../papers/{file_href}">{title}</a>
         </h2>
         <p class="small text-body-secondary mb-3">
           <span class="badge category-badge me-1">{category}</span>

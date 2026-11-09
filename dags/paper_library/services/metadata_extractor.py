@@ -10,13 +10,13 @@ class MetadataExtractor:
     Asks the local LLM for a paper's metadata as JSON.
     """
 
-    MAX_CHARS = 100_000 # ~25k tokens
     MAX_ATTEMPTS = 2 # one retry
     SYSTEM_PROMPT = "You extract metadata from research papers. Answer with JSON only."
     OLLAMA_PLACEHOLDER_API_KEY = "ollama" # placeholder key
 
-    def __init__(self, base_url: str, model: str):
+    def __init__(self, base_url: str, model: str, max_chars: int = 100_000): # 100k chars ~25k tokens
         self.model = model
+        self.max_chars = max_chars
         self.client = OpenAI(base_url=base_url, api_key=self.OLLAMA_PLACEHOLDER_API_KEY)
 
     def extract(self, markdown: str) -> PaperMetadata:
@@ -43,7 +43,7 @@ class MetadataExtractor:
         )
 
     def build_prompt(self, markdown: str) -> str:
-        paper_text = markdown[: self.MAX_CHARS]
+        paper_text = markdown[: self.max_chars]
         category_list = ", ".join(CATEGORIES)
 
         return (

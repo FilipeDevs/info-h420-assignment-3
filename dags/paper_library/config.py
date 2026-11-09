@@ -15,6 +15,7 @@ class Settings:
     discord_webhook_url: str | None
     llm_base_url: str
     llm_model: str
+    max_chars: int
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -28,5 +29,7 @@ class Settings:
             discord_webhook_url=os.environ.get("DISCORD_WEBHOOK_URL"),
             llm_base_url=os.environ.get("LLM_BASE_URL", "http://localhost:11434/v1"),
             # default model is gemma4:12b so if you want another one change your env.local and export LLM_MODEL="<model-name>"
-            llm_model=os.environ.get("LLM_MODEL", "gemma4:12b"), 
+            llm_model=os.environ.get("LLM_MODEL", "gemma4:12b"),
+            # 100000 chars needs Ollama's 32k context, with the default context use LLM_MAX_CHARS=12000
+            max_chars=int(os.environ.get("LLM_MAX_CHARS", "100000")),
         )

@@ -30,18 +30,32 @@ pip install -r requirements.txt
 
 **3. Install Ollama and the model**
 
-We used `gemma4:12b`. To use another model, pull it and add `export LLM_MODEL="<model-name>"` to `env.local`.
+We used `gemma4:12b`. 
 
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ollama pull gemma4:12b
 ```
 
-(Optional) We deciced to increase ollama context window so it can read longer papers but this is up to your system:
+If you want to use another model, pull it and add `export LLM_MODEL="<model-name>"` to `env.local`.
+
+```bash
+ollama pull llama3.2
+echo 'export LLM_MODEL="llama3.2"' >> env.local
+```
+
+For our pipeline we send up to 100 000 characters of each paper to the LLM, which needs a 32k context window. Ollama's default context is smaller so to increase it:
+
 ```bash
 sudo mkdir -p /etc/systemd/system/ollama.service.d
 printf '[Service]\nEnvironment="OLLAMA_CONTEXT_LENGTH=32768"\n' | sudo tee /etc/systemd/system/ollama.service.d/override.conf
 sudo systemctl daemon-reload && sudo systemctl restart ollama
+```
+
+But if instead you keep Ollama's default context, lower the number of characters sent to the LLM:
+
+```bash
+echo 'export LLM_MAX_CHARS=12000' >> env.local
 ```
 
 **4. Set up the synced folder**
@@ -50,16 +64,16 @@ The pipeline reads PDFs from a folder on your machine that Google Drive keeps in
  
 1. Create a folder named `ResearchLibrary` with two empty folders inside it named `papers` and `output`.
 2. In Google Drive for Desktop sync the folder `ResearchLibrary` to your machine.
-3. Open `env.sh` and replace the path on the `LIBRARY_DIR` line with the path of your folder:
+3. Add the path of your folder to `env.local` (if not set, it defaults to `~/ResearchLibrary`):
 
 ```bash
-   export LIBRARY_DIR="<your-path-to-ResearchLibrary>"
+echo 'export LIBRARY_DIR="<your-path-to-ResearchLibrary>"' >> env.local
 ```
 
 **5. Discord webhook**
 
 ```bash
-echo 'export DISCORD_WEBHOOK_URL="<your-webhook-url>"' > env.local
+echo 'export DISCORD_WEBHOOK_URL="<your-webhook-url>"' >> env.local
 ```
 
 ## Usage

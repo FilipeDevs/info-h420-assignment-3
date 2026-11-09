@@ -20,7 +20,7 @@ class DiscordNotifier:
         message = self.build_message(filename, metadata)
         response = requests.post(self.webhook_url, json=message, timeout=self.TIMEOUT_SECONDS)
 
-        # retry once if the request fails
+        # raise on an HTTP error so the task fails and Airflow retries it
         response.raise_for_status()
         return True
 

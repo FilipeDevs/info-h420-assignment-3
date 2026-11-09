@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from airflow.sdk import dag, task
+from airflow.sdk import dag, task, task_group
 
 # Each task imports only the libraries it needs, to prevent unnecessary imports and speed up the scheduler.
 
@@ -48,14 +48,15 @@ def paper_pipeline():
 
         return {"filename": filename, "markdown_path": str(markdown_path)}
 
-    @task(max_active_tis_per_dag=1)  # one LLM call at a time on the GPU
+    # one LLM call at a time on the GPU, and no Airflow retry: the single retry is done inside MetadataExtractor
+    @task(max_active_tis_per_dag=1, retries=0)
     def extract_metadata(document: dict) -> dict:
         from pathlib import Path
         from paper_library.config import Settings
         from paper_library.services.metadata_extractor import MetadataExtractor
 
         settings = Settings.from_env()
-        extractor = MetadataExtractor(settings.llm_base_url, settings.llm_model)
+        extractor = MetadataExtractor(settings.llm_base_url, settings.llm_model, settings.max_chars)
         markdown = Path(document["markdown_path"]).read_text(encoding="utf-8")
         metadata = extractor.extract(markdown)
         print(f"Metadata for {document['filename']}: {metadata}")
@@ -100,11 +101,17 @@ def paper_pipeline():
 
     # task order
     new_files = find_new_pdfs()
-    documents = convert_to_markdown.expand(filename=new_files) # one task instance for a new PDF
-    has_new_papers(new_files) >> documents
-    records = extract_metadata.expand(document=documents)
-    saved_records = save_to_database.expand(record=records)
-    notify_discord.expand(record=saved_records)
-    saved_records >> render_html()
+
+    # Mapped task group: one group instance per new PDF. Inside an instance the
+    # steps only depend on each other, so a paper that fails never blocks the others.
+    @task_group
+    def process_paper(filename: str):
+        document = convert_to_markdown(filename)
+        record = extract_metadata(document)
+        saved = save_to_database(record)
+        notify_discord(saved)
+
+    papers = process_paper.expand(filename=new_files)
+    has_new_papers(new_files) >> papers >> render_html()
 
 paper_pipeline()
